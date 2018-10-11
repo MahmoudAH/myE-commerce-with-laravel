@@ -1,0 +1,16 @@
+footer
+{
+	background-color: #34495e;
+	height: 70px;
+	position: relative;
+	bottom: 0
+}
+footer div
+{
+	margin-left: 50px
+}
+footer div p{
+	color: #fff;
+    margin-top: 15px;
+    
+}
