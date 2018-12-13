@@ -146,7 +146,10 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-       Melihovv\ShoppingCart\ServiceProvider::class,
+       Intervention\Image\ImageServiceProvider::class,
+      Gloudemans\Shoppingcart\ShoppingcartServiceProvider::class
+,
+
 
         /*
          * Package Service Providers...
@@ -157,9 +160,13 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        Laravel\Scout\ScoutServiceProvider::class,
+        Cartalyst\Stripe\Laravel\StripeServiceProvider::class,
+
+
 
     ],
 
@@ -209,7 +216,10 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'Cart' => Melihovv\ShoppingCart\Facades\ShoppingCart::class,
+        'Image' => Intervention\Image\Facades\Image::class,
+        'Cart' => Gloudemans\Shoppingcart\Facades\Cart::class,
+        'Stripe' => Cartalyst\Stripe\Laravel\Facades\Stripe::class,
+
 
 
     ],

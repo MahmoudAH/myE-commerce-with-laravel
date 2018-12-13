@@ -3,20 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Product;
+use Gloudemans\Shoppingcart\Facades\Cart;
 class CartController extends Controller
 {
-     public function index()
+    public function index()
     {
-        $mightAlsoLike = Product::mightAlsoLike()->get();
-
-        return view('cart')->with([
-            'mightAlsoLike' => $mightAlsoLike,
-            'discount' => getNumbers()->get('discount'),
-            'newSubtotal' => getNumbers()->get('newSubtotal'),
-            'newTax' => getNumbers()->get('newTax'),
-            'newTotal' => getNumbers()->get('newTotal'),
-        ]);
+      $products = Product::where('featured', true)->inRandomOrder()->take(4)->get();
+      return view('cart',compact('products'));   
     }
 
     /**
@@ -27,19 +21,25 @@ class CartController extends Controller
      */
     public function store(Product $product)
     {
-        $duplicates = Cart::search(function ($cartItem, $rowId) use ($product) {
-            return $cartItem->id === $product->id;
-        });
-
-        if ($duplicates->isNotEmpty()) {
-            return redirect()->route('cart.index')->with('success_message', 'Item is already in your cart!');
-        }
-
-        Cart::add($product->id, $product->name, 1, $product->price)
-            ->associate('App\Product');
-
-        return redirect()->route('cart.index')->with('success_message', 'Item was added to your cart!');
-    }
+     // $product=Product::findOrFail($id); 
+      $products = Product::where('featured', true)->inRandomOrder()->take(4)->get(); 
+      
+      $itemExist=Cart::search(function ($cartItem, $rowId)
+       use($product){
+       return $cartItem->id === $product->id;
+      });
+      if($itemExist->count()){
+         return redirect()->route('cart.index')->with('message', 'item was already added to your cart!');
+      }else{
+      
+      /*Cart::add( $product->id,
+        $product->name, 1, $product->price,['img'=>$product->image,'details'=>$product->details,'description'=>$product->description]);*/
+      Cart::add( $product->id,
+        $product->name, 1, $product->price)->associate('App\Product');
+        //dd(Cart::Content());
+        return redirect()->route('cart.index')->with('message', 'product was added to your cart!');       
+     }
+   }
 
     /**
      * Update the specified resource in storage.
@@ -50,23 +50,10 @@ class CartController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
-            'quantity' => 'required|numeric|between:1,5'
-        ]);
-
-        if ($validator->fails()) {
-            session()->flash('errors', collect(['Quantity must be between 1 and 5.']));
-            return response()->json(['success' => false], 400);
-        }
-
-        if ($request->quantity > $request->productQuantity) {
-            session()->flash('errors', collect(['We currently do not have enough items in stock.']));
-            return response()->json(['success' => false], 400);
-        }
-
-        Cart::update($id, $request->quantity);
-        session()->flash('success_message', 'Quantity was updated successfully!');
-        return response()->json(['success' => true]);
+        Cart::update($id,$request->qty);
+        //dd(cart::total());
+        return back()->with('message','Quantity was updated successfully!');
+    
     }
 
     /**
@@ -75,36 +62,39 @@ class CartController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function delete($id)
     {
-        Cart::remove($id);
 
-        return back()->with('success_message', 'Item has been removed!');
+        Cart::remove($id);
+        return back()->with('message', 'product was deleted from your cart!');
+      
     }
 
     /**
      * Switch item for shopping cart to Save for Later.
      *
-     * @param  int  $id
+     * @para   m  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function switchToSaveForLater($id)
+    public function watch_later($id)
     {
-        $item = Cart::get($id);
-
+        $product=Cart::get($id);
         Cart::remove($id);
 
-        $duplicates = Cart::instance('saveForLater')->search(function ($cartItem, $rowId) use ($id) {
-            return $rowId === $id;
+        $itemExist=Cart::instance('watchLater')->search(function ($cartItem, $rowId)
+          use($product){
+          return $cartItem->id === $product->id;
         });
+        if (Cart::count()) {
+          
+         if($itemExist->count()){
+            return redirect()->route('cart.index')->with('message',    'item was already added watchLaterList!');
+         }}
+        Cart::instance('watchLater')->add($product->id,
+        $product->name, 1, $product->price)->associate('App\Product');
+         //dd(Cart::instance('watchLater')->content());
+        return redirect()->route('cart.index')->with('message', 'product was added to watchLaterList!');       
 
-        if ($duplicates->isNotEmpty()) {
-            return redirect()->route('cart.index')->with('success_message', 'Item is already Saved For Later!');
-        }
-
-        Cart::instance('saveForLater')->add($item->id, $item->name, 1, $item->price)
-            ->associate('App\Product');
-
-        return redirect()->route('cart.index')->with('success_message', 'Item has been Saved For Later!');
+        
     }
 }

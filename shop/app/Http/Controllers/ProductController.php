@@ -11,14 +11,10 @@ class ProductController extends Controller
     {
         $pagination = 9;
         $categories = Category::all();
-
-        if (request()->category) {
-            $products = Product::with('categories');
-            $categoryName = optional($categories->where('slug', request()->category)->first())->name;
-        } else {
-            $products = Product::where('featured', true);
-            $categoryName = 'Featured';
-        }
+         
+        $products = Product::where('featured', true);
+        $categoryName = 'Featured';
+        
 
         if (request()->sort == 'low_high') {
             $products = $products->orderBy('price')->paginate($pagination);
@@ -27,8 +23,9 @@ class ProductController extends Controller
         } else {
             $products = $products->paginate($pagination);
         }
+        //$arrofproducts = get_object_vars($products);
 
-        return view('products')->with([
+        return view('shop')->with([
             'products' => $products,
             'categories' => $categories,
             'categoryName' => $categoryName,
@@ -43,18 +40,11 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::where('id', $id)->firstOrFail();
-        $mightAlsoLike = Product::where('id', '!=', $id)->mightAlsoLike()->get();
-
-        $stockLevel = getStockLevel($product->quantity);
-
-        return view('products')->with([
-            'product' => $product,
-            'stockLevel' => $stockLevel,
-            'mightAlsoLike' => $mightAlsoLike,
-        ]);
+        $product = Product::where('id',$id)->with('categories')->first();
+        $products = Product::where('featured', true)->inRandomOrder()->take(4)->get(); 
+        return view('product',compact('product','products'));
     }
-
+/*
     public function search(Request $request)
     {
         $request->validate([
@@ -65,5 +55,28 @@ class ProductController extends Controller
 
         return view('search-results')->with('products', $products);
     }
+*/
+    public function search_with_algolia(){
+        return view('search');
+    }
 
+    public function search(Request $request){
+
+        $request->validate([
+            'query' => 'required|min:3',
+        ]);
+
+        $query = $request->input('query');
+
+        // $products = Product::where('name', 'like', "%$query%")
+        //                    ->orWhere('details', 'like', "%$query%")
+        //                    ->orWhere('description', 'like', "%$query%")
+        //                    ->paginate(10);
+
+        $products = Product::search($query)->paginate(8);
+
+        return view('searchResults')->with('products', $products);
+    }
+
+    
 }

@@ -15,15 +15,34 @@
                         </li>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" href="#">Products</a>
+                          <a class="nav-link" href="{{route('shop.index')}}">Products</a>
                         </li>
                         <li class="nav-item">
-                          <a class="nav-link" href="#">Cart</a>
+                          <a class="nav-link" href="{{route('cart.index')}}">Cart
+                            @if(Cart::count() > 0)
+                            <span style="color: blue;padding:5px ;background-color: #ED5485;border-radius:100%;margin-left: 5px;">{{Cart::count()}}</span>
+                            @endif
+                          </a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="nav-link" href="{{route('watchlater.index')}}">WatchLater
+                            @if(Cart::instance('watchLater')->count() > 0)
+                            <span style="color: blue;padding:5px ;background-color: #ED5485;border-radius:100%;margin-left: 5px;">
+                                {{Cart::instance('watchLater')->count()}}</span>
+                            @endif
+                            </a>
                         </li>
                         <li class="nav-item">
                           <a class="nav-link" href="#">Contact us</a>
                         
-                    </ul>                                                
+                    </ul>                      
+                   <form class="form-inline my-2 my-lg-0" action="{{route('search')}}" method="GET" class="search-form">
+ 
+                        @csrf
+                     
+                      <input type="search" name="query" id="query" value="{{ request()->input('query') }}" class=" form-control mr-sm-2 search-box" placeholder="i am shopping for..." aria-label="Search" required style="width: 300px">
+                      <button class="btn btn-outline-success my-2 my-sm-0" type="submit" >Search</button>
+                    </form>
                     
 
                     <!-- Right Side Of Navbar -->

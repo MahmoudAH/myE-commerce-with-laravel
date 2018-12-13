@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<div style="padding-bottom: 300px">
-    
+<div class="" style="padding-bottom: 300px" id="welcome">
 </div>
 @endsection

@@ -1,15 +1,19 @@
 <?php
 
 namespace App;
+use Laravel\Scout\Searchable;
 use App\User;
-use Illuminate\Database\Eloquent\Model;
 use App\Category;
+use Illuminate\Database\Eloquent\Model;
+
 class Product extends Model
 {
-    protected $fillable = [
+    use Searchable;
+    protected $fillable = ['quantity'];
+   /* protected $fillable = [
         'name', 'details', 'price','description',
         'featured','image',
-    ];
+    ];*/
     public function categories()
     {
         return $this->belongsToMany('App\Category');
